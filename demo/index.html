@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sotto demo stage</title>
+    <style>
+      :root {
+        --bg: #0d0f13;
+        --tile: #1a1d24;
+        --text: #ececf1;
+        --muted: #9a9aa6;
+        --accent: #34d399;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+        color: var(--text);
+      }
+      html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: var(--bg); }
+      #desk { position: absolute; inset: 0; transform-origin: 0 0; transition: transform 0.8s ease, opacity 0.6s; }
+
+      /* ---- a generic video call ---- */
+      .call { position: absolute; inset: 0; background: radial-gradient(1200px 700px at 30% 20%, #1b2030, var(--bg)); }
+      .call .top { position: absolute; top: 22px; left: 32px; right: 32px; display: flex; gap: 14px; align-items: center; color: var(--muted); font-size: 15px; }
+      .call .top b { color: var(--text); font-weight: 600; }
+      .call .rec { width: 9px; height: 9px; border-radius: 50%; background: #f87171; }
+      .tile { position: absolute; border-radius: 18px; background: var(--tile); overflow: hidden; display: grid; place-items: center; box-shadow: 0 0 0 3px transparent; transition: box-shadow 0.25s; }
+      .tile.talking { box-shadow: 0 0 0 3px var(--accent); }
+      .tile .name { position: absolute; left: 16px; bottom: 14px; font-size: 15px; background: rgba(0,0,0,0.45); padding: 5px 11px; border-radius: 8px; }
+      .avatar { border-radius: 50%; display: grid; place-items: center; font-weight: 600; color: #fff; }
+      #them { left: 32px; top: 64px; width: 960px; height: 700px; background: linear-gradient(160deg, #23293a, #161922); }
+      #them .avatar { width: 168px; height: 168px; font-size: 58px; background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+      #me { left: 712px; top: 548px; width: 260px; height: 196px; border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(160deg, #2a2420, #1a1714); }
+      #me .avatar { width: 76px; height: 76px; font-size: 28px; background: linear-gradient(135deg, #f59e0b, #ef4444); }
+      #me .name { font-size: 13px; left: 10px; bottom: 9px; }
+      .controls { position: absolute; left: 32px; width: 960px; bottom: 34px; display: flex; justify-content: center; gap: 16px; }
+      .controls span { width: 52px; height: 52px; border-radius: 50%; background: #262a33; display: grid; place-items: center; }
+      .controls span svg { width: 22px; height: 22px; stroke: #d4d4d8; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .controls .leave { background: #dc2626; width: 72px; border-radius: 26px; }
+      .controls .leave svg { stroke: #fff; }
+
+      /* ---- the Sotto window ---- */
+      #sotto { position: absolute; left: 1028px; top: 64px; width: 540px; height: 700px; border: 0; background: transparent;
+        border-radius: 14px; box-shadow: 0 30px 80px rgba(0,0,0,0.55); transition: all 0.8s ease; }
+
+      /* ---- captions and cards ---- */
+      #caption { position: absolute; left: 64px; top: 96px; max-width: 620px; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; pointer-events: none; }
+      #caption.on { opacity: 1; transform: none; }
+      #caption h2 { margin: 0; font-size: 44px; line-height: 1.1; letter-spacing: -0.02em; text-shadow: 0 2px 24px rgba(0,0,0,0.6); }
+      #caption p { margin: 12px 0 0; font-size: 21px; color: #c9cbd3; text-shadow: 0 2px 16px rgba(0,0,0,0.6); }
+      #caption.dim h2 { background: rgba(13,15,19,0.72); padding: 14px 20px; border-radius: 14px; display: inline-block; }
+
+      .card { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 18px; opacity: 0; pointer-events: none; transition: opacity 0.7s ease;
+        background: radial-gradient(900px 600px at 50% 40%, #16302a, var(--bg) 70%); }
+      .card.on { opacity: 1; }
+      .card img { width: 112px; height: 112px; margin: 0 auto; border-radius: 26px; }
+      .card h1 { margin: 0; font-size: 84px; letter-spacing: -0.03em; }
+      .card .tag { font-size: 30px; color: #d4d4d8; max-width: 980px; line-height: 1.3; }
+      .card .chips { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+      .card .chips span { border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; padding: 9px 18px; font-size: 20px; color: #e4e4e7; }
+      .card .url { font-size: 28px; color: var(--accent); font-family: ui-monospace, Menlo, monospace; margin-top: 10px; }
+
+      /* ---- screen share comparison ---- */
+      #share { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.6s; }
+      #share.on { opacity: 1; }
+      #share .label { position: absolute; top: 120px; font-size: 24px; font-weight: 600; }
+      #share .label small { display: block; font-weight: 400; color: var(--muted); font-size: 17px; margin-top: 4px; }
+      #share .frame { position: absolute; top: 200px; width: 736px; height: 414px; border-radius: 14px; overflow: hidden; outline: 1px solid rgba(255,255,255,0.12); }
+      #share .frame > div { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform: scale(0.46); transform-origin: 0 0; }
+      #share .left { left: 48px; } #share .right { left: 816px; }
+      #share .frame.right { outline: 2px solid var(--accent); }
+      #share .sharing { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: #16a34a; color: #fff; font-size: 14px; padding: 5px 12px; border-radius: 999px; z-index: 2; }
+      #share .demo-note { position: absolute; bottom: 60px; left: 0; right: 0; text-align: center; color: var(--muted); font-size: 18px; }
+
+      .practice { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s; background: radial-gradient(1000px 700px at 70% 30%, #1d2440, var(--bg)); }
+      .practice.on { opacity: 1; }
+      .footnote { position: absolute; right: 22px; bottom: 12px; font-size: 13px; color: rgba(255,255,255,0.35); }
+    </style>
+  </head>
+  <body>
+    <div id="desk">
+      <div class="call" id="call">
+        <div class="top"><span class="rec"></span><b>Interview: Senior Frontend Engineer</b><span>· 12:41</span></div>
+        <div class="tile" id="them"><div class="avatar">JL</div><span class="name">Jordan Lee · Hiring manager</span></div>
+        <div class="tile" id="me"><div class="avatar">AR</div><span class="name">Alex (you)</span></div>
+        <div class="controls">
+          <span><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></span>
+          <span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 14V8m-3 3 3-3 3 3M8 21h8"/></svg></span>
+          <span class="leave"><svg viewBox="0 0 24 24"><path d="M3 14c5-5 13-5 18 0l-2 3-4-1v-3c-2-1-4-1-6 0v3l-4 1z"/></svg></span>
+        </div>
+      </div>
+      <div class="practice" id="practice"></div>
+      <iframe id="sotto" src="app.html" allowtransparency="true"></iframe>
+      <div id="caption"><h2></h2><p></p></div>
+    </div>
+
+    <div id="share">
+      <div class="label" style="left:48px">What you see</div>
+      <div class="label" style="left:816px">What they see when you share your screen<small>Sotto is left out of screen shares and recordings</small></div>
+      <div class="frame left"><div id="share-mine"></div></div>
+      <div class="frame right"><span class="sharing">You're sharing your screen</span><div id="share-theirs"></div></div>
+    </div>
+
+    <div class="card" id="intro">
+      <img src="../src-tauri/icons/128x128@2x.png" alt="" />
+      <h1>Sotto</h1>
+      <div class="tag">The free, open-source AI copilot for calls and interviews</div>
+    </div>
+    <div class="card" id="outro">
+      <img src="../src-tauri/icons/128x128@2x.png" alt="" />
+      <h1>Sotto</h1>
+      <div class="chips"><span>Free &amp; open source</span><span>Your own API keys</span><span>Under $1 an hour</span><span>macOS &amp; Windows</span></div>
+      <div class="url">github.com/taarruunnnn/sotto</div>
+    </div>
+
+    <div class="footnote" id="footnote">Real Sotto interface · simulated call</div>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+      const frame = $("sotto");
+
+      const ready = new Promise((resolve) => {
+        frame.addEventListener("load", () => {
+          const poll = () => (frame.contentWindow.demo ? resolve(frame.contentWindow.demo) : setTimeout(poll, 50));
+          poll();
+        });
+      });
+
+      const stage = {
+        ready,
+        /** The app's own document, for the recorder to click and type in. */
+        app: () => frame.contentWindow,
+        caption(title, sub = "", dim = false) {
+          const c = $("caption");
+          if (!title) return c.classList.remove("on");
+          c.querySelector("h2").textContent = title;
+          c.querySelector("p").textContent = sub;
+          c.classList.toggle("dim", dim);
+          c.classList.add("on");
+        },
+        card(id, on) { $(id).classList.toggle("on", on); },
+        /** Moves and resizes the Sotto window. */
+        place(rect) { Object.assign(frame.style, Object.fromEntries(Object.entries(rect).map(([k, v]) => [k, `${v}px`]))); },
+        practice(on) { $("practice").classList.toggle("on", on); $("call").style.opacity = on ? 0 : 1; },
+        /** Side by side: your screen with Sotto, and the shared screen without it. */
+        share(on) {
+          if (on) {
+            for (const [id, withSotto] of [["share-mine", true], ["share-theirs", false]]) {
+              const box = $(id);
+              box.replaceChildren($("call").cloneNode(true));
+              if (withSotto) {
+                const shot = document.createElement("img");
+                shot.src = stage.sottoShot;
+                Object.assign(shot.style, { position: "absolute", left: frame.style.left || "1028px", top: frame.style.top || "64px",
+                  width: frame.offsetWidth + "px", height: frame.offsetHeight + "px", borderRadius: "14px", boxShadow: "0 30px 80px rgba(0,0,0,.55)" });
+                box.append(shot);
+              }
+            }
+          }
+          $("desk").style.opacity = on ? 0 : 1;
+          $("share").classList.toggle("on", on);
+        },
+        footnote(on) { $("footnote").style.opacity = on ? 1 : 0; },
+        sottoShot: "",
+      };
+      window.stage = stage;
+
+      ready.then((demo) => {
+        demo.onSpeaking = (source, ms) => {
+          const tile = $(source);
+          tile.classList.add("talking");
+          clearTimeout(tile.timer);
+          tile.timer = setTimeout(() => tile.classList.remove("talking"), ms);
+        };
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sotto (demo)</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- The mock must be in place before the app starts talking to "Tauri". -->
+    <script type="module">
+      import "./mock.ts";
+      import "../src/main.tsx";
+    </script>
+  </body>
+</html>

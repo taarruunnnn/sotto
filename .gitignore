@@ -28,3 +28,6 @@ api.txt
 *.key
 .env
 .env.*
+
+# Demo recordings (regenerate with node demo/record.mjs)
+demo/out/

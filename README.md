@@ -23,7 +23,56 @@ AI model.
 [For developers](#for-developers) ·
 [Contribute](#contributing)
 
+<br><br>
+
+<a href="#see-it-in-action"><img src="docs/media/hero.gif" alt="Sotto hears an interview question and shows a short answer within a second" width="860"></a>
+
 </div>
+
+---
+
+## See it in action
+
+<!-- TRAILER -->
+**[▶ Watch the 75-second trailer](docs/media/trailer.mp4)**
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/media/call.png" alt="Sotto open next to a video call, answering the interviewer's question"></td>
+    <td width="50%"><img src="docs/media/screen-share.png" alt="Side by side: your screen shows Sotto, the shared screen doesn't"></td>
+  </tr>
+  <tr>
+    <td align="center">Answers appear while the call goes on</td>
+    <td align="center">Left out of screen shares and recordings</td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="25%"><img src="docs/media/answer.png" alt="An answer with a bold headline and three bullets"></td>
+    <td width="25%"><img src="docs/media/chat.png" alt="A typed question answered mid-call"></td>
+    <td width="25%"><img src="docs/media/practice.png" alt="Mock interview: your turn to answer"></td>
+    <td width="25%"><img src="docs/media/feedback.png" alt="Mock interview feedback with a score"></td>
+  </tr>
+  <tr>
+    <td align="center">Short, speakable answers</td>
+    <td align="center">Ask anything mid-call</td>
+    <td align="center">Practise with an AI interviewer</td>
+    <td align="center">Get scored feedback</td>
+  </tr>
+  <tr>
+    <td><img src="docs/media/history.png" alt="Past calls with notes"></td>
+    <td><img src="docs/media/settings.png" alt="Settings with one API key box that detects the provider"></td>
+    <td colspan="2" valign="top">
+      <br>
+      <b>Past calls</b> keep transcripts and notes on your computer.<br><br>
+      <b>One key box</b> works out whether your key is OpenRouter, OpenAI, Anthropic or Google.<br><br>
+      <sub>The trailer and screenshots show the real Sotto interface on a simulated call: the
+      transcript and AI replies are scripted, so no real keys or calls are involved. Make them
+      again with <code>node demo/record.mjs</code>.</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -396,6 +445,13 @@ npm run tauri build   # build an installer for this machine
 - Checks: `npx tsc --noEmit` for the frontend, `cargo test` in `src-tauri/` for the backend.
 - Installers are written to `src-tauri/target/release/bundle/`. Each OS can only build its
   own installer.
+
+### Screenshots and trailer
+
+`demo/` runs the real interface in Chrome on a scripted call, with the Tauri backend
+mocked (`demo/mock.ts`) and canned AI replies (`demo/script.ts`), so no keys are needed.
+`node demo/record.mjs` writes the screenshots, `trailer.mp4` and `hero.gif` to `demo/out/`
+(needs Google Chrome and ffmpeg). Copy the ones you want into `docs/media/`.
 
 ### Releasing
 
