@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Sotto transcribes your side of the conversation.</string>
+  <key>NSAudioCaptureUsageDescription</key>
+  <string>Sotto transcribes the other side of the call from your system audio.</string>
+  <key>NSScreenCaptureUsageDescription</key>
+  <string>Sotto reads code and questions on your screen when you ask it to.</string>
+  <key>LSUIElement</key>
+  <true/>
+</dict>
+</plist>
