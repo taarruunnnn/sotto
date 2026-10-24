@@ -3,7 +3,7 @@
 An open-source, real-time AI copilot for calls and interviews. It's a floating overlay
 that listens to both sides of a call, transcribes them live with Deepgram, and suggests
 what to say next with the model of your choice (Claude, GPT, Gemini, or any model through
-Vercel AI Gateway).
+OpenRouter or Vercel AI Gateway).
 
 Built with **Tauri 2** (Rust) + **React** + **AI SDK 7**.
 

@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { load, type Store } from "@tauri-apps/plugin-store";
 
-export type Provider = "anthropic" | "openai" | "google" | "gateway";
+export type Provider = "anthropic" | "openai" | "google" | "openrouter" | "gateway";
 export type Mode = "interview" | "meeting";
 export type AnswerLength = "short" | "detailed";
 export type MockType = "behavioral" | "technical" | "mixed";
@@ -52,7 +52,8 @@ export const MAX_INSTRUCTIONS = 20_000;
 export const DEFAULT_MODELS: Record<Provider, string> = {
   anthropic: "claude-haiku-5-5",
   openai: "gpt-5-mini",
-  google: "gemini-2.5-flash",
+  google: "gemini-3.8-flash",
+  openrouter: "google/gemini-3.8-flash",
   gateway: "anthropic/claude-haiku-5.5",
 };
 
@@ -60,6 +61,7 @@ export const PROVIDER_ORIGINS: Record<Provider, string> = {
   anthropic: "https://api.anthropic.com",
   openai: "https://api.openai.com",
   google: "https://generativelanguage.googleapis.com",
+  openrouter: "https://openrouter.ai",
   gateway: "https://ai-gateway.vercel.sh",
 };
 
@@ -88,7 +90,7 @@ export const DEFAULT_SETTINGS: Settings = {
   micDevice: "",
   outputDevice: "",
   provider: "anthropic",
-  apiKeys: { anthropic: "", openai: "", google: "", gateway: "" },
+  apiKeys: { anthropic: "", openai: "", google: "", openrouter: "", gateway: "" },
   models: { ...DEFAULT_MODELS },
   mode: "interview",
   answerLength: "short",
@@ -113,7 +115,7 @@ const getStore = () => (store ??= load("settings.json", { defaults: {}, autoSave
 // ---- API keys: OS keychain -------------------------------------------------------
 
 type SecretName = "deepgram" | Provider;
-const PROVIDERS: Provider[] = ["anthropic", "openai", "google", "gateway"];
+const PROVIDERS: Provider[] = ["anthropic", "openai", "google", "openrouter", "gateway"];
 
 /** False when the OS keychain can't be used; keys then stay in settings.json. */
 let keychainOk = true;

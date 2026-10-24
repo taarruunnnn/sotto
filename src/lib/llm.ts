@@ -11,6 +11,8 @@ const loaders = {
   anthropic: () => import("@ai-sdk/anthropic").then((m) => m.createAnthropic),
   openai: () => import("@ai-sdk/openai").then((m) => m.createOpenAI),
   google: () => import("@ai-sdk/google").then((m) => m.createGoogleGenerativeAI),
+  // OpenRouter speaks the OpenAI Chat Completions format.
+  openrouter: () => import("@ai-sdk/openai").then((m) => m.createOpenAI),
   gateway: () => import("@ai-sdk/gateway").then((m) => m.createGateway),
 };
 
@@ -40,6 +42,14 @@ async function getModel(s: Settings): Promise<LanguageModel> {
       break;
     case "google":
       model = (await loaders.google())(opts)(modelId);
+      break;
+    case "openrouter":
+      model = (await loaders.openrouter())({
+        ...opts,
+        baseURL: "https://openrouter.ai/api/v1",
+        // Optional attribution headers that OpenRouter shows in its dashboard.
+        headers: { "HTTP-Referer": "https://github.com/taarruunnnn/sotto", "X-Title": "Sotto" },
+      }).chat(modelId);
       break;
     case "gateway":
       model = (await loaders.gateway())(opts)(modelId);
