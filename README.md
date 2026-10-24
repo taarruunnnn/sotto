@@ -17,6 +17,7 @@ AI model.
 
 [**Download**](https://github.com/taarruunnnn/sotto/releases/latest) ·
 [How it works](#how-it-works) ·
+[Cost](#cost-under-1-an-hour-no-subscription) ·
 [Lightweight](#tiny-and-lightweight) ·
 [API keys](#which-api-keys-work) ·
 [For developers](#for-developers) ·
@@ -39,13 +40,57 @@ version.
 
 | | **Sotto** | Parakeet AI and similar closed-source tools |
 |---|---|---|
-| Price | Free. You pay your AI provider for what you use | Paid plans or credits |
+| Price | Free app; about **$0.85 an hour** in provider usage ([details](#cost-under-1-an-hour-no-subscription)) | Paid plans or credits |
 | Source code | Open (MIT) | Closed |
 | AI model | Your choice: Gemini, Claude, GPT or hundreds via OpenRouter | Chosen by the vendor |
 | Your conversations | Stay on your computer; sent only to the providers you choose | Go through the vendor's service |
 | API keys | Stored in your OS keychain | n/a |
 | Interview practice | Built-in mock interviewer with spoken questions and scored feedback | Varies |
 | Extend it | Fork it, add features, send a pull request | Request a feature and wait |
+
+## Cost: under $1 an hour, no subscription
+
+Sotto is free. You only pay the transcription and AI providers for what you actually use,
+at their own prices, with no markup.
+
+| | **Sotto** | **Parakeet AI** |
+|---|---|---|
+| One hour of live calls | **about $0.85** | $7.77–$24.83 (1 credit, depending on pack size) |
+| One hour of mock interview | **about $0.40** | 1 credit |
+| 10 hours of calls a month | **about $8.50** | ~$100 (Unlimited monthly) or $78–$248 in credits |
+| Subscription | None | Weekly, monthly or yearly plans |
+| Free usage | $200 of Deepgram credit for new accounts covers **200+ hours** of transcription | 10-minute free session, one free mock |
+
+**Sotto is roughly 9 to 30 times cheaper per hour than Parakeet AI's credits**, and if you
+use it for less than about 120 hours a month it costs less than an unlimited plan.
+
+<details>
+<summary>How these numbers were worked out</summary>
+
+**Sotto, one hour of live calls with `google/gemini-3.8-flash` on OpenRouter:**
+- Transcription: two Deepgram streams (your mic and the other side) × 60 min × $0.0048/min
+  = **$0.58**
+- AI answers: about 40 answers an hour, each about 5,000 input tokens (recent transcript,
+  resume, instructions) and 500 output tokens including reasoning.
+  200k input × $0.825/M + 20k output × $4.125/M = **$0.25**
+- Total: **about $0.83 an hour**. With `anthropic/claude-haiku-5.5` it's about $0.61, and
+  with `openai/gpt-5-mini` about $0.67.
+
+**Sotto, one hour of mock interview:** one Deepgram stream (your mic only, $0.29) plus
+about 25 interviewer turns and the feedback report (about $0.12): **about $0.40 an hour**.
+
+**Parakeet AI**, from its pricing page, which shows prices in Indian rupees. Converted at
+₹95 = $1:
+- Unlimited: ₹4,980/week (~$52), ₹9,470/month (~$100) or ₹37,900/year (~$399)
+- Credits: 1 credit = 1 hour of calls (0.5 credit = 30 minutes). Packs cost from ₹2,360
+  for 1 credit (~$24.83 an hour) down to ₹738 per credit in the 15-credit pack (~$7.77 an
+  hour).
+
+Your actual cost depends on how long your calls are, how often answers are generated, and
+the size of your resume and documents. Deepgram's rate is its current promotional
+pay-as-you-go price ($0.0077/min normally, which makes a live-call hour about $1.17).
+Prices checked in October 2026 and may change; check each provider's pricing page.
+</details>
 
 ## What we suggest using it for
 
@@ -184,8 +229,8 @@ accounts get free credit.
 than anything else. "Flash", "Haiku" and "mini" models start answering in about a second.
 The model field accepts any model id, so new models work without an update.
 
-**Cost:** you pay the providers directly for what you use. Fast models are inexpensive,
-and there's no Sotto subscription.
+**Cost:** you pay the providers directly for what you use: about $0.85 for an hour of
+live calls. See [Cost](#cost-under-1-an-hour-no-subscription).
 
 ## Install
 
@@ -398,7 +443,8 @@ Good places to start:
 
 **Is Sotto free?**
 Yes. The app is free and open source under the MIT license. You pay Deepgram and your AI
-provider directly for what you use.
+provider directly for what you use, which is about $0.85 for an hour of live calls. New
+Deepgram accounts get $200 of free credit. See [Cost](#cost-under-1-an-hour-no-subscription).
 
 **Does it work with Zoom, Google Meet, Microsoft Teams and Slack?**
 Yes. Sotto listens to your computer's audio, so it works with any call app, in the browser
