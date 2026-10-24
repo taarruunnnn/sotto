@@ -5,9 +5,11 @@ import { PROVIDERS } from "./components/providers";
 import { ShortcutList } from "./components/Onboarding";
 import { testDeepgramKey, testProvider } from "./lib/checks";
 import { DOCUMENT_ACCEPT, extractText } from "./lib/documents";
+import { isMac } from "./lib/checks";
 import { errorMessage } from "./lib/llm";
 import {
   CODE_LANGUAGES,
+  keysInKeychain,
   LANGUAGES,
   MAX_INSTRUCTIONS,
   type Provider,
@@ -53,6 +55,11 @@ export default function SettingsView({ settings: s, onChange, onRerunSetup }: Pr
 
   return (
     <main className="settings">
+      <p className="muted">
+        {keysInKeychain()
+          ? `API keys are stored in ${isMac ? "your macOS Keychain" : "Windows Credential Manager"}, not in a file.`
+          : "The system keychain isn't available, so API keys are stored in Sotto's settings file."}
+      </p>
       <h3>Transcription</h3>
       <KeyField
         label="Deepgram API key"

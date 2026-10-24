@@ -16,8 +16,9 @@ const Markdown = lazy(() => import("react-markdown"));
 const SettingsView = lazy(() => import("./Settings"));
 const Onboarding = lazy(() => import("./components/Onboarding"));
 const History = lazy(() => import("./components/History"));
+const MockInterview = lazy(() => import("./components/MockInterview"));
 
-type View = "main" | "settings" | "history" | "onboarding";
+type View = "main" | "settings" | "history" | "onboarding" | "mock";
 type Live = Record<Speaker, { committed: string; interim: string }>;
 interface Shot {
   id: number;
@@ -73,6 +74,7 @@ export default function App() {
   // Event listeners are registered once, so they read current values from refs.
   // Lines and answers are written through the refs first, so they're never stale.
   const settingsRef = useRef(settings);
+  const viewRef = useRef(view);
   const linesRef = useRef(lines);
   const liveRef = useRef(live);
   const shotsRef = useRef(shots);
@@ -86,6 +88,7 @@ export default function App() {
   const nextId = useRef(0);
   const transcriptEl = useRef<HTMLElement>(null);
   settingsRef.current = settings;
+  viewRef.current = view;
   shotsRef.current = shots;
 
   const updateLines = (fn: (l: Line[]) => Line[]) => {
@@ -243,6 +246,8 @@ export default function App() {
   useEffect(() => {
     const unlisten = [
       listen<TranscriptEvent>("transcript", ({ payload: e }) => {
+        // The mock interview handles its own transcript.
+        if (viewRef.current === "mock") return;
         const cur = { ...liveRef.current[e.source] };
         if (e.isFinal) {
           cur.committed = `${cur.committed} ${e.text}`.trim();
@@ -287,6 +292,7 @@ export default function App() {
         }
       }),
       listen<string>("shortcut", ({ payload }) => {
+        if (viewRef.current === "mock") return;
         switch (payload) {
           case "answer":
             return void runAnswer("answer");
@@ -414,6 +420,9 @@ export default function App() {
             <button className={listening ? "danger" : "primary"} onClick={toggleListening}>
               {listening ? "Stop" : "Listen"}
             </button>
+            <button onClick={() => setView("mock")} disabled={listening} title={listening ? "Stop listening to practise" : "Mock interview"}>
+              Practice
+            </button>
             <button onClick={() => setView("history")} title="Past calls">☰</button>
             <button onClick={() => setView("settings")} title="Settings">⚙︎</button>
           </>
@@ -438,6 +447,9 @@ export default function App() {
           <SettingsView settings={settings} onChange={updateSettings} onRerunSetup={() => setView("onboarding")} />
         )}
         {view === "history" && <History />}
+        {view === "mock" && (
+          <MockInterview settings={settings} onChange={updateSettings} onExit={() => setView("main")} />
+        )}
       </Suspense>
 
       {view === "main" && (

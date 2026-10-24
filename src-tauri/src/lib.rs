@@ -1,6 +1,7 @@
 mod audio;
 mod deepgram;
 mod net;
+mod secrets;
 mod stealth;
 
 use audio::Source;
@@ -36,8 +37,15 @@ fn level_emitter(app: &AppHandle, source: Source) -> impl Fn(f32) + Send + 'stat
     }
 }
 
-fn sources(capture_mic: bool) -> Vec<Source> {
-    if capture_mic { vec![Source::Them, Source::Me] } else { vec![Source::Them] }
+fn sources(capture_mic: bool, capture_system: bool) -> Vec<Source> {
+    let mut sources = Vec::new();
+    if capture_system {
+        sources.push(Source::Them);
+    }
+    if capture_mic {
+        sources.push(Source::Me);
+    }
+    sources
 }
 
 fn device_for(source: Source, mic: &Option<String>, output: &Option<String>) -> Option<String> {
@@ -56,6 +64,8 @@ fn start_session(
     capture_mic: bool,
     mic_device: Option<String>,
     output_device: Option<String>,
+    // Mock interviews only need the mic; the interviewer's voice is the app's own.
+    capture_system: Option<bool>,
 ) -> Result<(), String> {
     if deepgram_key.trim().is_empty() {
         return Err("Add your Deepgram API key in Settings first.".into());
@@ -68,7 +78,7 @@ fn start_session(
     state.audio_test.lock().unwrap().clear();
 
     let mut streams = Vec::new();
-    for source in sources(capture_mic) {
+    for source in sources(capture_mic, capture_system.unwrap_or(true)) {
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let device = device_for(source, &mic_device, &output_device);
         let stream = audio::start_capture(source, device.as_deref(), Some(tx), level_emitter(&app, source))
@@ -100,7 +110,7 @@ fn start_audio_test(
     output_device: Option<String>,
 ) -> Result<(), String> {
     let mut streams = Vec::new();
-    for source in sources(true) {
+    for source in sources(true, true) {
         let device = device_for(source, &mic_device, &output_device);
         let stream = audio::start_capture(source, device.as_deref(), None, level_emitter(&app, source))
             .map_err(|e| format!("Could not capture {source:?} audio: {e:#}"))?;
@@ -292,7 +302,9 @@ pub fn run() {
             set_click_through,
             net::proxy_fetch,
             net::proxy_abort,
-            net::warm
+            net::warm,
+            secrets::get_secret,
+            secrets::set_secret
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

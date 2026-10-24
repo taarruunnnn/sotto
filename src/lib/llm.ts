@@ -140,6 +140,74 @@ export async function streamNotes(settings: Settings, transcript: Line[], signal
   });
 }
 
+// ---- mock interview ----------------------------------------------------------------
+
+export interface MockTurn {
+  role: "interviewer" | "candidate";
+  text: string;
+}
+
+/** The interviewer ends its last turn with this; it's stripped before display and speech. */
+export const END_MARK = "[END]";
+
+const MOCK_FOCUS: Record<Settings["mockType"], string> = {
+  behavioral: "behavioural questions about past experience: ownership, teamwork, conflict, failure, impact",
+  technical:
+    "technical questions for the role: fundamentals, problem solving and system design. Describe coding problems in words, since the candidate answers out loud",
+  mixed: "a realistic mix of behavioural and technical questions",
+};
+
+function interviewerInstructions(s: Settings, answered: number): string {
+  const parts = [
+    `You are a professional, friendly interviewer running a practice interview.
+Role being interviewed for: ${s.mockRole.trim() || "software engineer"}.
+Ask ${MOCK_FOCUS[s.mockType]}.
+The interview has ${s.mockQuestions} main questions. The candidate has answered ${answered} times so far (follow-ups included).
+
+Everything you write is read aloud by text-to-speech, so:
+- Write plain spoken sentences. No Markdown, lists, code, headings or emoji.
+- Keep each turn under 60 words and ask exactly one question.
+
+How to run it:
+- First turn: greet the candidate in one sentence, then ask the first main question.
+- After an answer, react naturally in at most one short sentence without grading it. If the answer was vague or missed the point, ask one follow-up; otherwise move to the next main question.
+- After the answer to the last main question, thank the candidate in one sentence and end your message with ${END_MARK}.`,
+  ];
+  if (s.resume.trim()) parts.push(`Candidate's resume, to tailor questions:\n<resume>\n${s.resume.trim()}\n</resume>`);
+  return parts.join("\n\n");
+}
+
+export async function streamInterviewer(settings: Settings, turns: MockTurn[], signal?: AbortSignal) {
+  const answered = turns.filter((t) => t.role === "candidate").length;
+  return streamText({
+    model: await getModel(settings),
+    instructions: interviewerInstructions(settings, answered),
+    // Providers expect the conversation to start with a user message.
+    messages: [
+      { role: "user", content: "(The candidate has joined the call.)" },
+      ...turns.map((t): ModelMessage => ({ role: t.role === "interviewer" ? "assistant" : "user", content: t.text })),
+    ],
+    abortSignal: signal,
+    maxOutputTokens: 300,
+  });
+}
+
+export async function streamMockFeedback(settings: Settings, turns: MockTurn[], signal?: AbortSignal) {
+  const transcript = turns.map((t) => `${t.role === "interviewer" ? "Interviewer" : "Candidate"}: ${t.text}`).join("\n");
+  return streamText({
+    model: await getModel(settings),
+    instructions:
+      `You are an experienced interview coach reviewing a practice interview for: ${settings.mockRole.trim() || "software engineer"}. ` +
+      "The candidate's answers were transcribed from speech, so ignore filler words and transcription errors. " +
+      "Write Markdown with these sections: ## Overall (a score out of 10 and two or three sentences), " +
+      "## Question by question (for each main question: the question in italics, what worked, what to improve, " +
+      "and a short outline of a stronger answer), ## Practise next (the three most useful things to work on). " +
+      "Be specific and honest, and only refer to what was actually said. No preamble.",
+    prompt: `<interview>\n${transcript}\n</interview>`,
+    abortSignal: signal,
+  });
+}
+
 /**
  * Reads a text stream, calling `onText` with each delta. `streamText` reports
  * provider errors (bad key, unknown model) as stream parts rather than throwing,

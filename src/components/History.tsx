@@ -66,7 +66,7 @@ export default function History() {
           <button key={s.id} className="session-row" onClick={() => setOpen(s)}>
             <span>
               <b>{new Date(s.startedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</b>
-              <span className="muted"> · {s.mode === "interview" ? "Interview" : "Call"}{minutes ? ` · ${minutes} min` : ""}</span>
+              <span className="muted"> · {s.mock ? "Mock interview" : s.mode === "interview" ? "Interview" : "Call"}{minutes ? ` · ${minutes} min` : ""}</span>
             </span>
             <span className="muted ellipsis">{firstQuestion ?? "No transcript"}</span>
           </button>

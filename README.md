@@ -30,6 +30,10 @@ Built with **Tauri 2** (Rust) + **React** + **AI SDK 7**.
   40 calls) and can be copied as Markdown.
 - **Answer history.** Step back through earlier answers during a call. Click a transcript
   line to leave it out of AI prompts.
+- **Mock interview.** Practise with an AI interviewer that asks questions out loud
+  (using your OS's text-to-speech voices) for the role you enter, follows up on vague
+  answers, and gives you scored, question-by-question feedback at the end. Your answers
+  are transcribed from the mic, and the session is saved to your call history.
 - **Key failover.** Enter several API keys separated by commas; when one is rejected or
   rate-limited, the next is used.
 - **Privacy / stealth.** The overlay is excluded from screen sharing, recording and
@@ -145,26 +149,28 @@ src-tauri/src/
   audio.rs       cpal capture: mic + system loopback → 16 kHz mono PCM, level meter
   deepgram.rs    one WebSocket per source → `transcript` events
   net.rs         pooled HTTP client that AI requests stream through (no CORS)
+  secrets.rs     API keys in the macOS Keychain / Windows Credential Manager
   stealth.rs     capture exclusion, no Dock/taskbar, always-on-top
   lib.rs         commands (sessions, audio check, screenshot), shortcuts, tray
 src/
   App.tsx        overlay UI, question detection, answer streaming
   Settings.tsx   keys, devices, model, mode, resume, instructions, documents
-  components/    setup wizard, call history, key field, audio meter
+  components/    setup wizard, mock interview, call history, key field, audio meter
   lib/llm.ts     AI SDK providers and prompts
   lib/net.ts     fetch over net.rs, with multi-key failover
   lib/sessions.ts  saved calls
   lib/documents.ts PDF / DOCX / text extraction
+  lib/speech.ts  text-to-speech for the mock interviewer
 ```
 
-API keys are stored locally in the app data folder (`settings.json`) and sent only to
-the providers you configure.
+API keys are stored in the OS credential store (macOS Keychain, Windows Credential
+Manager), never in a file, and are sent only to the providers you configure. Keys saved by
+older versions in `settings.json` are moved to the keychain on first launch. Other
+settings live in the app data folder (`settings.json`).
 
 ## Roadmap
 
-- Mock interview mode (AI interviewer with TTS)
 - Local transcription (NVIDIA Parakeet / Whisper) for offline use
-- Store keys in the OS keychain
 
 ## License
 

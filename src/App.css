@@ -232,3 +232,11 @@ textarea { resize: vertical; }
   min-width: 0;
 }
 .history .transcript { flex: 2; }
+
+/* ---- mock interview -------------------------------------------------------- */
+
+.mock { overflow-y: auto; }
+.mock-status { display: flex; align-items: center; gap: 8px; }
+.mock-question { flex: 2; display: flex; align-items: center; }
+.mock-question p { font-size: calc(var(--font-size, 14px) + 2px); line-height: 1.45; }
+.mock-answer { flex: 2; }

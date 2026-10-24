@@ -18,6 +18,8 @@ export interface Session {
   startedAt: number;
   endedAt?: number;
   mode: Mode;
+  /** A practice interview with the AI interviewer. */
+  mock?: boolean;
   lines: Line[];
   answers: Answer[];
 }
