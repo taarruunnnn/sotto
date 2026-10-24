@@ -52,15 +52,36 @@ Built with **Tauri 2** (Rust) + **React** + **AI SDK 7**.
 The shortcuts work without focusing the overlay, so you never have to click away from the
 call. With the overlay focused, `Esc` stops the answer that's streaming.
 
-## Getting started
+## Install
 
-Prerequisites: [Rust](https://rustup.rs), Node 22+, and the
-[Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS.
+Download the latest installer from the
+[Releases page](https://github.com/taarruunnnn/sotto/releases/latest).
 
-```sh
-npm install
-npm run tauri dev
-```
+### macOS (14.6 or later)
+
+1. Download the `.dmg` for your Mac: `aarch64` for Apple Silicon (M1 and later), `x64`
+   for Intel. To check, open  → About This Mac and look at "Chip".
+2. Open the `.dmg` and drag **Sotto** into **Applications**.
+3. Open Sotto from Applications. The builds aren't notarized by Apple yet, so the first
+   launch is blocked:
+   - Go to **System Settings → Privacy & Security**, scroll down and click
+     **Open Anyway** next to the message about Sotto, then confirm.
+   - If macOS says the app **"is damaged and can't be opened"**, run this in Terminal,
+     then open it again:
+     ```sh
+     xattr -dr com.apple.quarantine /Applications/Sotto.app
+     ```
+4. Sotto has no Dock icon. Look for it in the **menu bar** (top right).
+
+### Windows (10 version 2004 or later, or 11)
+
+1. Download `Sotto_x.y.z_x64-setup.exe` (or the `.msi` if you prefer).
+2. Run it. The installer isn't code-signed yet, so SmartScreen may show
+   **"Windows protected your PC"**: click **More info → Run anyway**.
+3. Sotto has no taskbar button. Look for it in the **system tray** (bottom right; it may
+   be under the **^** overflow arrow).
+
+### First launch
 
 On first launch a short setup walks you through:
 
@@ -74,8 +95,8 @@ Press **Listen** when the call starts. You can rerun the setup from Settings.
 ### Permissions
 
 - **macOS (14.6+ required for system audio):** allow Microphone, System Audio Recording
-  and Screen Recording when prompted. In `tauri dev` the permission is granted to your
-  terminal app. The audio check links straight to the right System Settings panes.
+  and Screen Recording when prompted. When running from source with `tauri dev`, the
+  permission is granted to your terminal app instead. The audio check links straight to the right System Settings panes.
 - **Windows:** no extra permissions. Screen-capture exclusion needs Windows 10 2004+.
 
 ### Stealth troubleshooting
@@ -86,6 +107,36 @@ Press **Listen** when the call starts. You can rerun the setup from Settings.
 - **Icon still in the macOS Dock:** turn off **Show suggested and recent apps** in
   System Settings → Desktop & Dock, then restart Sotto.
 - Always do a test share with the app you'll actually use before a real call.
+
+## Build from source
+
+Prerequisites: [Rust](https://rustup.rs), [Node 22+](https://nodejs.org), and the
+[Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS (Xcode Command
+Line Tools on macOS; Visual Studio C++ Build Tools and WebView2 on Windows).
+
+```sh
+git clone https://github.com/taarruunnnn/sotto.git
+cd sotto
+npm install
+npm run tauri dev     # run in development
+npm run tauri build   # build an installer for this machine
+```
+
+Installers are written to `src-tauri/target/release/bundle/` (`dmg/` on macOS, `nsis/`
+and `msi/` on Windows). Each OS can only build its own installer.
+
+### Releasing
+
+`.github/workflows/release.yml` builds macOS (Apple Silicon and Intel) and Windows
+installers on GitHub Actions and attaches them to a draft release. Bump `version` in
+`src-tauri/tauri.conf.json`, `package.json` and `src-tauri/Cargo.toml`, then:
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Review the draft on the Releases page and publish it.
 
 ## Architecture
 
@@ -114,3 +165,7 @@ the providers you configure.
 - Mock interview mode (AI interviewer with TTS)
 - Local transcription (NVIDIA Parakeet / Whisper) for offline use
 - Store keys in the OS keychain
+
+## License
+
+[MIT](LICENSE)
