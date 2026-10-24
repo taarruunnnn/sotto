@@ -159,8 +159,9 @@ impl Resampler {
             out.push((s.clamp(-1.0, 1.0) * i16::MAX as f32) as i16);
             self.pos += self.step;
         }
-        // Keep only the samples the next call still needs.
-        let consumed = self.pos as usize;
+        // Keep only the samples the next call still needs. The last step can land past
+        // the end (when downsampling), so the leftover offset carries into the next call.
+        let consumed = (self.pos as usize).min(self.pending.len());
         self.pending.drain(..consumed);
         self.pos -= consumed as f64;
         out
@@ -177,5 +178,20 @@ mod tests {
         let out: usize = (0..10).map(|_| r.process(&vec![0.5; 480]).len()).sum();
         // 4800 input samples at a 3:1 ratio, minus the one-sample lookahead.
         assert!((1599..=1600).contains(&out), "got {out}");
+    }
+
+    /// Real devices deliver buffer sizes that don't divide evenly by the ratio, so the
+    /// read position can land past the end of the pending samples.
+    #[test]
+    fn handles_uneven_buffer_sizes() {
+        for (rate, chunk) in [(48_000, 512), (44_100, 441), (48_000, 1), (96_000, 7), (44_100, 1024)] {
+            let mut r = Resampler::new(rate, 16_000);
+            let mut out = 0;
+            for _ in 0..2_000 {
+                out += r.process(&vec![0.25; chunk]).len();
+            }
+            let expected = (2_000 * chunk) as f64 * 16_000.0 / rate as f64;
+            assert!((out as f64 - expected).abs() <= 2.0, "{rate} Hz, {chunk}: got {out}, expected ~{expected}");
+        }
     }
 }
