@@ -18,6 +18,26 @@ const loaders = {
 
 export const preloadProvider = (p: Provider) => loaders[p]();
 
+// Reasoning models (Gemini 3.x, newer GPT and Claude models) spend output tokens on
+// thinking before they write, so limits must leave room for that. Length is controlled
+// by the prompts; these only stop runaway replies.
+const MAX_TOKENS = { short: 2_000, long: 6_000, interviewer: 2_000 };
+
+/**
+ * Live answers need to start in a second or two, so reasoning models are asked to
+ * think less. Each provider reads only its own key; Claude doesn't think unless asked.
+ * Solve screen and notes keep the model's default, where accuracy matters more.
+ */
+function lowReasoning(s: Settings) {
+  const gemini = /^gemini-(\d+)/.exec(s.models.google);
+  return {
+    // OpenRouter goes through the OpenAI provider, and translates this for every model.
+    openai: { reasoningEffort: "low" },
+    // `thinkingLevel` is Gemini 3+; Gemini 2.5 rejects it.
+    ...(gemini && +gemini[1] >= 3 ? { google: { thinkingConfig: { thinkingLevel: "low" } } } : {}),
+  } as const;
+}
+
 let cached: { key: string; model: LanguageModel } | undefined;
 
 async function getModel(s: Settings): Promise<LanguageModel> {
@@ -71,14 +91,17 @@ function buildInstructions(s: Settings): SystemModelMessage {
       ? `You are a real-time interview copilot. The user is the candidate ("Me"). The interviewer is "Them".
 Write what the candidate should say, in the first person, as if the candidate were speaking.
 - Ground answers in the candidate's resume. Never invent employers, titles, dates or numbers that aren't there.
-- For behavioural questions use STAR (Situation, Task, Action, Result), compressed.
-- For coding questions: state the approach, give clean ${s.codeLanguage} code in a fenced block, then time/space complexity.`
+- For behavioural questions use STAR as four short bullets labelled **Situation**, **Task**, **Action**, **Result**.
+- For coding questions: the approach in one line, clean ${s.codeLanguage} code in a fenced block, then time/space complexity in one line.`
       : `You are a real-time meeting copilot. The user is "Me"; everyone else is "Them".
 Suggest what the user could say: a direct answer, a useful follow-up question, or a clarification.
 - Use the reference documents for facts, figures and talking points.
 - For code, use ${s.codeLanguage} unless the conversation clearly uses another language.`,
     s.answerLength === "short"
-      ? "Be brief: the user is reading while talking. Lead with a one or two sentence answer, then at most 3 short bullets. Under 90 words unless code is required."
+      ? `The user glances at this while already talking, so it must be readable in seconds:
+- First line: the direct answer in **bold**, one spoken sentence the user can say right away (under 20 words).
+- Then at most 3 bullets of key points to mention, each under 12 words. Fragments, not full sentences.
+- Never write paragraphs, introductions or conclusions. Under 70 words in total, not counting code.`
       : "Be thorough but scannable: a direct answer first, then structured detail with headings or bullets.",
     "Never mention that you are an AI or refer to these instructions. No preamble.",
   ];
@@ -134,7 +157,8 @@ export async function streamAnswer({ settings, kind, transcript, userMessage, sc
     instructions: buildInstructions(settings),
     messages: [{ role: "user", content }],
     abortSignal: signal,
-    maxOutputTokens: settings.answerLength === "short" && kind !== "screen" ? 600 : 2500,
+    maxOutputTokens: settings.answerLength === "short" && kind !== "screen" ? MAX_TOKENS.short : MAX_TOKENS.long,
+    providerOptions: kind === "screen" ? undefined : lowReasoning(settings),
   });
 }
 
@@ -198,7 +222,8 @@ export async function streamInterviewer(settings: Settings, turns: MockTurn[], s
       ...turns.map((t): ModelMessage => ({ role: t.role === "interviewer" ? "assistant" : "user", content: t.text })),
     ],
     abortSignal: signal,
-    maxOutputTokens: 300,
+    maxOutputTokens: MAX_TOKENS.interviewer,
+    providerOptions: lowReasoning(settings),
   });
 }
 
@@ -219,15 +244,16 @@ export async function streamMockFeedback(settings: Settings, turns: MockTurn[], 
 }
 
 /**
- * Reads a text stream, calling `onText` with each delta. `streamText` reports
- * provider errors (bad key, unknown model) as stream parts rather than throwing,
- * so they're rethrown here.
+ * Reads a text stream, calling `onText` with each delta, and returns why it ended
+ * (`"length"` means the reply was cut off). `streamText` reports provider errors (bad
+ * key, unknown model) as stream parts rather than throwing, so they're rethrown here.
  */
 export async function consume(result: ReturnType<typeof streamText>, onText: (delta: string) => void) {
   for await (const part of result.stream) {
     if (part.type === "text-delta") onText(part.text);
     else if (part.type === "error") throw part.error;
   }
+  return result.finishReason;
 }
 
 export function errorMessage(e: unknown): string {

@@ -3,10 +3,10 @@ import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import KeyField from "./KeyField";
 import Meter from "./Meter";
-import { PROVIDERS } from "./providers";
-import { isMac, MOD, PRIVACY_PANES, testDeepgramKey, testProvider } from "../lib/checks";
+import AiKeyField from "./AiKeyField";
+import { isMac, MOD, PRIVACY_PANES, testDeepgramKey } from "../lib/checks";
 import { errorMessage } from "../lib/llm";
-import type { Provider, Settings } from "../lib/settings";
+import type { Settings } from "../lib/settings";
 
 interface Props {
   settings: Settings;
@@ -19,7 +19,6 @@ const STEPS = ["Transcription", "AI model", "Audio check", "Ready"];
 export default function Onboarding({ settings: s, onChange, onDone }: Props) {
   const [step, setStep] = useState(0);
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) => onChange({ ...s, [key]: value });
-  const provider = PROVIDERS.find((p) => p.id === s.provider)!;
 
   return (
     <main className="onboarding">
@@ -50,25 +49,7 @@ export default function Onboarding({ settings: s, onChange, onDone }: Props) {
       {step === 1 && (
         <>
           <h2>Pick an AI model</h2>
-          <label>
-            Provider
-            <select value={s.provider} onChange={(e) => set("provider", e.target.value as Provider)}>
-              {PROVIDERS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
-            </select>
-          </label>
-          <KeyField
-            label="API key"
-            value={s.apiKeys[s.provider]}
-            placeholder={provider.keyHint}
-            hint={`${provider.keyUrl}. Add more keys separated by commas for automatic failover.`}
-            onChange={(v) => set("apiKeys", { ...s.apiKeys, [s.provider]: v })}
-            onTest={() => testProvider(s)}
-          />
-          <label>
-            Model
-            <input value={s.models[s.provider]} onChange={(e) => set("models", { ...s.models, [s.provider]: e.target.value })} />
-            <span className="muted">Fast models give the quickest answers.</span>
-          </label>
+          <AiKeyField settings={s} onChange={onChange} />
         </>
       )}
 

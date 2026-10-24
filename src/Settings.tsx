@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import KeyField from "./components/KeyField";
-import { PROVIDERS } from "./components/providers";
+import AiKeyField from "./components/AiKeyField";
 import { ShortcutList } from "./components/Onboarding";
-import { testDeepgramKey, testProvider } from "./lib/checks";
+import { testDeepgramKey } from "./lib/checks";
 import { DOCUMENT_ACCEPT, extractText } from "./lib/documents";
 import { isMac } from "./lib/checks";
 import { errorMessage } from "./lib/llm";
@@ -12,7 +12,6 @@ import {
   keysInKeychain,
   LANGUAGES,
   MAX_INSTRUCTIONS,
-  type Provider,
   type Settings,
 } from "./lib/settings";
 
@@ -32,7 +31,6 @@ export default function SettingsView({ settings: s, onChange, onRerunSetup }: Pr
   const [devices, setDevices] = useState<{ inputs: Device[]; outputs: Device[] }>({ inputs: [], outputs: [] });
   const [docError, setDocError] = useState("");
   const [loadingDocs, setLoadingDocs] = useState(false);
-  const provider = PROVIDERS.find((p) => p.id === s.provider)!;
 
   useEffect(() => {
     invoke<typeof devices>("list_audio_devices").then(setDevices).catch(() => {});
@@ -97,24 +95,7 @@ export default function SettingsView({ settings: s, onChange, onRerunSetup }: Pr
       )}
 
       <h3>AI model</h3>
-      <label>
-        Provider
-        <select value={s.provider} onChange={(e) => set("provider", e.target.value as Provider)}>
-          {PROVIDERS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
-        </select>
-      </label>
-      <KeyField
-        label="API key(s)"
-        value={s.apiKeys[s.provider]}
-        placeholder={provider.keyHint}
-        hint="Separate several keys with commas; if one fails or hits a limit, the next is used."
-        onChange={(v) => set("apiKeys", { ...s.apiKeys, [s.provider]: v })}
-        onTest={() => testProvider(s)}
-      />
-      <label>
-        Model
-        <input value={s.models[s.provider]} onChange={(e) => set("models", { ...s.models, [s.provider]: e.target.value })} />
-      </label>
+      <AiKeyField settings={s} onChange={onChange} />
 
       <h3>Answers</h3>
       <div className="segmented">

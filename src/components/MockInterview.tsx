@@ -13,7 +13,7 @@ import {
 } from "../lib/llm";
 import { saveSession } from "../lib/sessions";
 import type { MockType, Settings } from "../lib/settings";
-import { loadVoices, SpeechQueue, ttsSupported } from "../lib/speech";
+import { chime, loadVoices, SpeechQueue, ttsSupported } from "../lib/speech";
 import type { TranscriptEvent } from "../lib/transcript";
 
 const Markdown = lazy(() => import("react-markdown"));
@@ -32,7 +32,7 @@ const TYPES: { id: MockType; label: string }[] = [
   { id: "technical", label: "Technical" },
   { id: "mixed", label: "Mixed" },
 ];
-/** Mic audio right after the interviewer stops is usually the tail of its own voice. */
+/** Mic audio right after the interviewer stops is usually the tail of its own voice (and the chime). */
 const ECHO_GRACE_MS = 600;
 
 const stripEnd = (text: string) => text.replace(END_MARK, "").replace(/\[END\]?$/, "").trim();
@@ -121,24 +121,29 @@ export default function MockInterview({ settings: s, onChange, onExit }: Props) 
 
     let text = "";
     let done = false;
+    // Only hand over to the candidate once the whole question has arrived and been spoken.
     const afterSpeaking = () => {
       if (controller.signal.aborted) return;
       const turn: MockTurn = { role: "interviewer", text: stripEnd(text) };
       turnsRef.current = [...history, turn];
       setTurns(turnsRef.current);
-      if (done) finish(turnsRef.current);
-      else setStatusNow("listening");
+      if (done) return void finish(turnsRef.current);
+      setStatusNow("listening");
+      chime();
     };
     const queue = new SpeechQueue(s.mockVoice, voices, () => setStatusNow("speaking"), afterSpeaking, stripEnd);
     speech.current = queue;
 
     try {
       const result = await streamInterviewer(s, history, controller.signal);
-      await consume(result, (delta) => {
+      const reason = await consume(result, (delta) => {
         text += delta;
         setQuestion(stripEnd(text));
         queue.push(delta);
       });
+      if (reason === "length") {
+        setError("The interviewer's reply was cut off by the model's length limit. Press Repeat question, or answer what you heard.");
+      }
       done = text.includes(END_MARK);
       queue.end();
     } catch (e) {
@@ -310,7 +315,11 @@ export default function MockInterview({ settings: s, onChange, onExit }: Props) 
       <div className="mock-status">
         <span className={`dot ${status === "listening" ? "listening" : "connecting"}`} />
         <span>
-          {status === "thinking" ? "Interviewer is thinking…" : status === "speaking" ? "Interviewer is speaking…" : "Your turn: answer out loud"}
+          {status === "thinking"
+            ? "Interviewer is thinking…"
+            : status === "speaking"
+              ? "Interviewer is asking…"
+              : <b className="your-turn">Your turn: answer out loud, then press Done answering</b>}
         </span>
         <span className="spacer" />
         <span className="muted">{asked} answered</span>

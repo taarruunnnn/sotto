@@ -76,3 +76,25 @@ export class SpeechQueue {
     speechSynthesis.speak(u);
   }
 }
+
+/** A short, soft two-note cue that it's the user's turn to speak. */
+export function chime() {
+  try {
+    const ctx = new AudioContext();
+    [660, 880].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const t = ctx.currentTime + i * 0.12;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.2);
+    });
+    setTimeout(() => ctx.close(), 600);
+  } catch {
+    // No Web Audio: the on-screen prompt is enough.
+  }
+}

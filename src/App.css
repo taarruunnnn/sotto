@@ -240,3 +240,7 @@ textarea { resize: vertical; }
 .mock-question { flex: 2; display: flex; align-items: center; }
 .mock-question p { font-size: calc(var(--font-size, 14px) + 2px); line-height: 1.45; }
 .mock-answer { flex: 2; }
+.your-turn { color: var(--accent); }
+.detected { display: flex; align-items: center; gap: 8px; }
+button.link { background: none; border: none; padding: 0; color: var(--muted); text-decoration: underline; font-size: 12px; }
+button.link:hover:not(:disabled) { background: none; color: var(--text); }

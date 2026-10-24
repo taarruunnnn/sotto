@@ -1,60 +1,191 @@
+<div align="center">
+
 # Sotto
 
-An open-source, real-time AI copilot for calls and interviews. It's a floating overlay
-that listens to both sides of a call, transcribes them live with Deepgram, and suggests
-what to say next with the model of your choice (Claude, GPT, Gemini, or any model through
-OpenRouter or Vercel AI Gateway).
+**The free, open-source alternative to Parakeet AI, Cluely, Final Round AI, LockedIn AI
+and similar AI interview and meeting assistants.**
 
-Built with **Tauri 2** (Rust) + **React** + **AI SDK 7**.
+Live transcription of both sides of a call, instant AI answers and suggestions, meeting
+notes, and a mock interviewer that talks to you. Free, private, and you bring your own
+AI model.
+
+[![Latest release](https://img.shields.io/github/v/release/taarruunnnn/sotto?label=download)](https://github.com/taarruunnnn/sotto/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+![macOS](https://img.shields.io/badge/macOS-14.6%2B-black?logo=apple)
+![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows)
+[![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-24C8DB?logo=tauri)](https://tauri.app)
+
+[**Download**](https://github.com/taarruunnnn/sotto/releases/latest) ·
+[How it works](#how-it-works) ·
+[Lightweight](#tiny-and-lightweight) ·
+[API keys](#which-api-keys-work) ·
+[For developers](#for-developers) ·
+[Contribute](#contributing)
+
+</div>
+
+---
+
+## Why Sotto?
+
+Tools like Parakeet AI, Cluely, Final Round AI and LockedIn AI are closed-source and
+paid: you buy a plan or credits, your conversations go through their service, and you use
+whatever AI model they choose.
+
+Sotto is a **free, open-source alternative to all of them**. It runs on your computer, talks directly to
+the AI provider you pick with your own API key, and keeps transcripts on your machine.
+The whole thing is MIT-licensed, so you can read every line, change it and ship your own
+version.
+
+| | **Sotto** | Parakeet AI and similar closed-source tools |
+|---|---|---|
+| Price | Free. You pay your AI provider for what you use | Paid plans or credits |
+| Source code | Open (MIT) | Closed |
+| AI model | Your choice: Gemini, Claude, GPT or hundreds via OpenRouter | Chosen by the vendor |
+| Your conversations | Stay on your computer; sent only to the providers you choose | Go through the vendor's service |
+| API keys | Stored in your OS keychain | n/a |
+| Interview practice | Built-in mock interviewer with spoken questions and scored feedback | Varies |
+| Extend it | Fork it, add features, send a pull request | Request a feature and wait |
+
+## What we suggest using it for
+
+- **Interview practice.** The mock interviewer asks role-specific questions out loud,
+  listens to your spoken answers, follows up when you're vague, and scores each answer
+  with concrete tips. This is the best way to use Sotto for interviews.
+- **Meetings and sales or support calls.** Pull facts from your own documents while you
+  talk, get suggested follow-up questions, and finish with notes, decisions and action
+  items you can paste anywhere.
+- **Accessibility.** Live captions for both sides of a call help if you're hard of
+  hearing, in a noisy place, or following a fast speaker.
+- **Calls in a second language.** Read along with the transcript and ask the chat what a
+  phrase meant or how to reply naturally.
+- **Lectures, webinars and podcasts.** Capture what was said and turn it into notes.
+- **Reviewing past calls.** Every call's transcript and notes are saved locally, so you
+  can see what you were asked and how you could answer better next time.
+
+## Responsible use
+
+Sotto is a productivity, accessibility and practice tool. **We don't support or promote
+using it to cheat**, for example in exams, graded assessments, certification tests, or
+interviews where outside help isn't allowed.
+
+- **Follow the rules of the room.** If an interview, test or meeting doesn't allow AI
+  assistance, don't use it there. Practise beforehand with the mock interviewer instead.
+- **Get consent before transcribing other people.** Recording and transcription laws vary
+  by country and state, and many require everyone on the call to agree. Tell people you're
+  using a transcription tool.
+- **The overlay hides itself from screen shares for privacy**, so your private notes and
+  documents aren't broadcast to everyone when you present. It isn't designed to evade
+  proctoring or monitoring software, and we won't accept contributions that add that.
+- **Check what the AI says.** Answers can be wrong. You're responsible for what you say.
 
 ## Features
 
-- **Live transcription of both sides.** System audio ("Them") is captured with OS loopback
-  and the microphone ("Me") separately, each on its own Deepgram `nova-3` stream. Pick the
-  input and output devices and the language (or multilingual auto-detect) in Settings.
-- **Auto Answer.** When the other side asks a question, an answer starts streaming as soon
-  as the sentence is finished, without waiting for them to pause. If they keep talking, it
+- **Live transcription of both sides.** Your microphone ("Me") and the computer's audio
+  ("Them") are captured separately and transcribed in real time with Deepgram `nova-3`.
+  Choose devices and language (or multilingual auto-detect) in Settings.
+- **Auto Answer.** When the other person asks a question, an answer starts streaming as
+  soon as the question ends, often before they've paused. If they keep talking, it
   restarts with the full question.
-- **Suggest.** Something natural to say out loud right now, plus key points and likely
-  follow-ups.
-- **Solve screen.** Screenshots the monitor and sends it to a vision model for coding or
-  on-screen questions. For multi-part problems, add screenshots one at a time and send
-  them together.
-- **Interview and Regular call modes.** Interview mode grounds answers in your resume.
-- **Context.** Up to 20,000 characters of instructions, plus reference documents
-  (PDF, DOCX, TXT, Markdown, CSV, JSON). Your resume can be uploaded as a PDF or DOCX too.
-- **Chat.** Ask anything about the call.
-- **Notes.** Summary, discussion points, decisions, action items and next steps, generated
-  from the transcript.
-- **Call history.** Every call's transcript, answers and notes are saved locally (the last
-  40 calls) and can be copied as Markdown.
-- **Answer history.** Step back through earlier answers during a call. Click a transcript
-  line to leave it out of AI prompts.
-- **Mock interview.** Practise with an AI interviewer that asks questions out loud
-  (using your OS's text-to-speech voices) for the role you enter, follows up on vague
-  answers, and gives you scored, question-by-question feedback at the end. Your answers
-  are transcribed from the mic, and the session is saved to your call history.
-- **Key failover.** Enter several API keys separated by commas; when one is rejected or
-  rate-limited, the next is used.
-- **Privacy / stealth.** The overlay is excluded from screen sharing, recording and
-  screenshots. It has no Dock icon or taskbar button (use the tray icon) and floats over
-  fullscreen apps. Can be turned off in Settings, along with opacity and text size.
+- **Answers you can glance at.** One bold line you can say right away, then a few short
+  bullet points. No walls of text. STAR format for behavioural questions; approach, code
+  and complexity for coding questions.
+- **Suggest.** Something natural to say next, plus key points and likely follow-ups.
+- **Solve screen.** Send a screenshot to a vision model to explain a diagram, an error or
+  a document on your screen. Add several screenshots for multi-page content.
+- **Chat.** Ask anything about the call so far.
+- **Notes.** Summary, discussion points, decisions, action items and next steps.
+- **Mock interview.** Spoken questions for the role you enter (behavioural, technical or
+  mixed), follow-ups, and question-by-question feedback with a score.
+- **Your context.** Add your resume and reference documents (PDF, DOCX, TXT, Markdown,
+  CSV, JSON) plus up to 20,000 characters of instructions.
+- **Call history.** The last 40 calls are saved on your computer, with transcripts,
+  answers and notes. Copy any of them as Markdown.
+- **Private by design.** API keys live in the macOS Keychain or Windows Credential
+  Manager. The overlay stays out of screen shares and recordings, has no Dock or taskbar
+  icon, and floats above full-screen apps. All of this can be turned off.
+- **Keyboard first.** Global shortcuts work without switching windows (see below).
+- **Key failover.** Add several API keys separated by commas; if one hits a limit, the
+  next is used.
 
-## Global shortcuts
+## Tiny and lightweight
 
-| Shortcut (macOS / Windows) | Action |
-|---|---|
-| `⌘↵` / `Ctrl+Enter` | Answer the last question |
-| `⌘⇧↵` / `Ctrl+Shift+Enter` | Suggest something to say |
-| `⌘⇧S` / `Ctrl+Shift+S` | Screenshot and solve |
-| `⌘⇧A` / `Ctrl+Shift+A` | Add a screenshot (sent with the next solve) |
-| `⌘⇧[` `⌘⇧]` / `Ctrl+Shift+[` `Ctrl+Shift+]` | Previous / next answer |
-| `⌘\` / `Ctrl+\` | Hide / show overlay |
-| `⌘⇧M` / `Ctrl+Shift+M` | Click-through mode (mouse passes through the overlay) |
-| `⌘ + arrows` / `Ctrl + arrows` | Move overlay |
+Sotto is a few megabytes, on both macOS and Windows:
 
-The shortcuts work without focusing the overlay, so you never have to click away from the
-call. With the overlay focused, `Esc` stops the answer that's streaming.
+| | macOS | Windows |
+|---|---|---|
+| Download | **3.3 MB** (Apple Silicon `.dmg`), 3.5 MB (Intel) | **2.6 MB** (`.exe` installer), 3.5 MB (`.msi`) |
+| Installed | about **6 MB** | one small native executable, plus Microsoft's WebView2, which Windows 10 and 11 already include |
+
+*Measured on the v0.1.2 release.* For comparison, desktop apps built on Electron bundle a
+whole copy of the Chromium browser and are usually well over 100 MB.
+
+How it stays this small:
+
+- **No bundled browser.** Sotto is built with [Tauri](https://tauri.app), which uses the
+  web view the operating system already has (WebKit on macOS, WebView2 on Windows)
+  instead of shipping its own.
+- **A native Rust core.** Audio capture, transcription streaming, networking and keychain
+  access are compiled Rust, built with link-time optimisation and stripped of debug data.
+- **No bundled AI or speech models.** Transcription runs on Deepgram, answers come from
+  the provider you choose, and the mock interviewer uses your system's built-in voices.
+- **Load on demand.** The AI provider libraries, the PDF and Word parsers, the Markdown
+  renderer and the settings, history and mock interview screens load the first time
+  they're used, so startup only loads the overlay.
+- **Light at runtime.** Audio level meters update the screen directly instead of
+  re-rendering the app, streamed answers are drawn at most once per frame, and all AI
+  requests share one kept-alive connection.
+
+## How it works
+
+```mermaid
+flowchart LR
+    Mic["🎙️ Your microphone"] --> Capture
+    Sys["🔊 Computer audio<br/>(Zoom, Meet, Teams…)"] --> Capture
+    Capture["Audio capture<br/>Rust · 16 kHz mono"] -->|WebSocket| DG["Deepgram<br/>speech-to-text"]
+    DG -->|live transcript| UI["Overlay<br/>React"]
+    UI -->|question detected| AI["Your AI model<br/>OpenRouter · Gemini · Claude · GPT"]
+    AI -->|streamed answer| UI
+```
+
+1. **Capture.** Sotto records your mic and, separately, whatever your computer is playing
+   (macOS 14.6+ system audio tap, Windows WASAPI loopback). Both are converted to 16 kHz
+   mono audio.
+2. **Transcribe.** Each stream goes to Deepgram over its own WebSocket, so the transcript
+   knows who said what and updates as people speak.
+3. **Detect.** When the other side asks a question, Sotto notices immediately (no waiting
+   for a long pause) and starts an answer. You can also trigger one any time with a
+   shortcut.
+4. **Answer.** The question, recent conversation, your resume and documents go to your
+   chosen AI model, and the answer streams into the overlay word by word.
+5. **Practise.** In mock interview mode the AI plays the interviewer: its questions are
+   spoken with your system's text-to-speech voices, your spoken answers are transcribed,
+   and you get feedback at the end.
+
+## Which API keys work
+
+Sotto needs two keys: one for transcription and one for the AI model. Both stay in your
+OS keychain and are sent only to that provider.
+
+**Transcription (required):** a [Deepgram](https://console.deepgram.com) API key. New
+accounts get free credit.
+
+**AI model (pick one):** paste the key and Sotto detects which service it belongs to.
+
+| Provider | Key looks like | Suggested model | Notes |
+|---|---|---|---|
+| **[OpenRouter](https://openrouter.ai/keys)** (recommended) | `sk-or-…` | `google/gemini-3.8-flash` | One key for Gemini, Claude, GPT and hundreds of other models |
+| [Google AI Studio](https://aistudio.google.com) | `AIza…` | `gemini-3.8-flash` | |
+| [Anthropic](https://console.anthropic.com) | `sk-ant-…` | `claude-haiku-5-5` | |
+| [OpenAI](https://platform.openai.com) | `sk-…` | `gpt-5-mini` | |
+| [Vercel AI Gateway](https://vercel.com/ai-gateway) | (chosen manually) | `anthropic/claude-haiku-5.5` | |
+
+**Pick a fast model.** In a live conversation, how quickly the answer starts matters more
+than anything else. "Flash", "Haiku" and "mini" models start answering in about a second.
+The model field accepts any model id, so new models work without an update.
+
+**Cost:** you pay the providers directly for what you use. Fast models are inexpensive,
+and there's no Sotto subscription.
 
 ## Install
 
@@ -85,34 +216,124 @@ Download the latest installer from the
 3. Sotto has no taskbar button. Look for it in the **system tray** (bottom right; it may
    be under the **^** overflow arrow).
 
+Linux isn't supported yet. [Help wanted!](#contributing)
+
 ### First launch
 
-On first launch a short setup walks you through:
+A short setup walks you through:
 
-1. A **Deepgram** API key ([console.deepgram.com](https://console.deepgram.com))
-2. An API key for your AI provider, plus a model id (editable, so newer models work).
-   Both keys have a **Test** button.
-3. An audio check, with level meters for your mic and computer audio
+1. Your **Deepgram** key, with a **Test** button.
+2. Your **AI key**. Paste it and Sotto detects the provider. Then **Test** it.
+3. An **audio check** with level meters for your mic and computer audio.
 
-Press **Listen** when the call starts. You can rerun the setup from Settings.
+Then press **Listen** when a call starts, or **Practice** for a mock interview. You can
+rerun the setup from Settings.
 
 ### Permissions
 
-- **macOS (14.6+ required for system audio):** allow Microphone, System Audio Recording
-  and Screen Recording when prompted. When running from source with `tauri dev`, the
-  permission is granted to your terminal app instead. The audio check links straight to the right System Settings panes.
-- **Windows:** no extra permissions. Screen-capture exclusion needs Windows 10 2004+.
+- **macOS:** allow **Microphone**, **System Audio Recording** and **Screen Recording**
+  when asked. The audio check links straight to the right System Settings panes.
+- **Windows:** no extra permissions.
 
-### Stealth troubleshooting
+### Troubleshooting
 
-- **Overlay visible in a Zoom screen share:** in Zoom, open Settings → Share Screen →
-  Advanced and turn on **Advanced capture with window filtering**. Without it, Zoom can
-  capture the screen in a way that ignores capture exclusion.
-- **Icon still in the macOS Dock:** turn off **Show suggested and recent apps** in
+- **The "Them" meter doesn't move.** Sotto records the Mac's or PC's current output
+  device. If the call plays through headphones plugged into a monitor, or another device,
+  choose that device under Settings → Computer audio, or make it the system output.
+- **Overlay visible in a Zoom screen share.** In Zoom, open Settings → Share Screen →
+  Advanced and turn on **Advanced capture with window filtering**.
+- **Icon still in the macOS Dock.** Turn off **Show suggested and recent apps** in
   System Settings → Desktop & Dock, then restart Sotto.
-- Always do a test share with the app you'll actually use before a real call.
+- **Answers are slow.** Use a fast model (see [above](#which-api-keys-work)). Each
+  answer shows how long it took to start.
 
-## Build from source
+## Keyboard shortcuts
+
+| macOS | Windows | Action |
+|---|---|---|
+| `⌘↵` | `Ctrl+Enter` | Answer the last question (or "Done answering" in a mock interview) |
+| `⌘⇧↵` | `Ctrl+Shift+Enter` | Suggest something to say |
+| `⌘⇧S` | `Ctrl+Shift+S` | Screenshot and explain |
+| `⌘⇧A` | `Ctrl+Shift+A` | Add a screenshot (sent with the next one) |
+| `⌘⇧[` / `⌘⇧]` | `Ctrl+Shift+[` / `Ctrl+Shift+]` | Previous / next answer |
+| `⌘\` | `Ctrl+\` | Hide / show the overlay |
+| `⌘⇧M` | `Ctrl+Shift+M` | Click-through mode (the mouse passes through the overlay) |
+| `⌘ + arrows` | `Ctrl + arrows` | Move the overlay |
+
+With the overlay focused, `Esc` stops the answer that's streaming.
+
+## For developers
+
+Sotto is a [Tauri 2](https://tauri.app) desktop app: a **Rust** backend for everything
+that touches the operating system, and a **React + TypeScript** frontend for the UI and
+AI logic.
+
+```mermaid
+flowchart TB
+    subgraph Backend["Backend · Rust (src-tauri/src)"]
+        audio["audio.rs<br/>mic + loopback capture, resampling"]
+        deepgram["deepgram.rs<br/>speech-to-text WebSocket"]
+        net["net.rs<br/>pooled HTTP proxy"]
+        secrets["secrets.rs<br/>OS keychain"]
+        stealth["stealth.rs<br/>window privacy"]
+        lib["lib.rs<br/>commands, shortcuts, tray"]
+    end
+    subgraph Frontend["Frontend · React + TypeScript (src)"]
+        app["App.tsx<br/>overlay, question detection"]
+        llm["lib/llm.ts<br/>prompts, AI SDK providers"]
+        speech["lib/speech.ts<br/>text-to-speech"]
+        mock["components/MockInterview.tsx"]
+    end
+    audio --> deepgram -->|"transcript events"| app
+    app --> llm -->|"fetch via"| net --> Providers["AI providers"]
+    mock --> speech
+    mock --> llm
+    lib -->|"shortcut events"| app
+    secrets -.->|"API keys"| llm
+```
+
+### Backend (Rust)
+
+| File | What it does |
+|---|---|
+| `audio.rs` | Captures the mic and system audio with [cpal](https://github.com/RustAudio/cpal) (Core Audio process tap on macOS, WASAPI loopback on Windows), downmixes to mono, resamples to 16 kHz and reports levels for the meters |
+| `deepgram.rs` | One WebSocket per audio source to Deepgram's live API; emits `transcript` and `transcriber-status` events to the UI |
+| `net.rs` | A pooled, kept-alive HTTP client that AI requests stream through, avoiding browser CORS limits and repeated TLS handshakes |
+| `secrets.rs` | Reads and writes API keys in the macOS Keychain / Windows Credential Manager via [keyring](https://crates.io/crates/keyring) |
+| `stealth.rs` | Screen-capture exclusion, no Dock/taskbar icon, always on top |
+| `lib.rs` | Tauri commands (start/stop session, screenshot, audio check), global shortcuts and the tray menu |
+
+### Frontend (React + TypeScript)
+
+| File | What it does |
+|---|---|
+| `App.tsx` | The overlay: live transcript, question detection, streaming answers, screenshots, sessions |
+| `Settings.tsx`, `components/` | Settings, first-run setup, AI key detection, call history, mock interview, audio meters |
+| `lib/llm.ts` | All prompts, and the [AI SDK](https://ai-sdk.dev) providers (OpenRouter, Anthropic, Google, OpenAI, AI Gateway) |
+| `lib/net.ts` | `fetch` over `net.rs`, with multi-key failover |
+| `lib/transcript.ts` | Transcript formatting and the instant question detector |
+| `lib/speech.ts` | Text-to-speech for the mock interviewer, spoken sentence by sentence as text streams in |
+| `lib/settings.ts`, `lib/sessions.ts` | Settings (keys go to the keychain) and saved calls |
+| `lib/documents.ts` | Text extraction from PDF and DOCX uploads |
+
+### Voice
+
+- **In (speech-to-text):** Deepgram `nova-3` over WebSocket with interim results, so text
+  appears while people are still speaking. Endpointing and utterance-end events mark when
+  someone has finished.
+- **Out (text-to-speech):** the Web Speech API with the operating system's voices, used by
+  the mock interviewer. No extra key needed.
+
+### AI
+
+- Built on the [Vercel AI SDK](https://ai-sdk.dev), so adding a provider is a few lines in
+  `lib/llm.ts`.
+- Live answers ask reasoning models to think less, so they start in about a second.
+  Screenshots and notes use the model's full reasoning.
+- The resume, documents and instructions go in one cacheable system message, so repeated
+  answers are faster and cheaper.
+
+### Run it locally
 
 Prerequisites: [Rust](https://rustup.rs), [Node 22+](https://nodejs.org), and the
 [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS (Xcode Command
@@ -122,56 +343,88 @@ Line Tools on macOS; Visual Studio C++ Build Tools and WebView2 on Windows).
 git clone https://github.com/taarruunnnn/sotto.git
 cd sotto
 npm install
-npm run tauri dev     # run in development
+npm run tauri dev     # run with hot reload
 npm run tauri build   # build an installer for this machine
 ```
 
-Installers are written to `src-tauri/target/release/bundle/` (`dmg/` on macOS, `nsis/`
-and `msi/` on Windows). Each OS can only build its own installer.
+- In `tauri dev` on macOS, audio and screen permissions are granted to your terminal app.
+- Checks: `npx tsc --noEmit` for the frontend, `cargo test` in `src-tauri/` for the backend.
+- Installers are written to `src-tauri/target/release/bundle/`. Each OS can only build its
+  own installer.
 
 ### Releasing
 
 `.github/workflows/release.yml` builds macOS (Apple Silicon and Intel) and Windows
 installers on GitHub Actions and attaches them to a draft release. Bump `version` in
-`src-tauri/tauri.conf.json`, `package.json` and `src-tauri/Cargo.toml`, then:
+`src-tauri/tauri.conf.json`, `package.json` and `src-tauri/Cargo.toml`, then push a tag:
 
 ```sh
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.3
+git push origin v0.1.3
 ```
 
 Review the draft on the Releases page and publish it.
 
-## Architecture
+## Contributing
 
-```
-src-tauri/src/
-  audio.rs       cpal capture: mic + system loopback → 16 kHz mono PCM, level meter
-  deepgram.rs    one WebSocket per source → `transcript` events
-  net.rs         pooled HTTP client that AI requests stream through (no CORS)
-  secrets.rs     API keys in the macOS Keychain / Windows Credential Manager
-  stealth.rs     capture exclusion, no Dock/taskbar, always-on-top
-  lib.rs         commands (sessions, audio check, screenshot), shortcuts, tray
-src/
-  App.tsx        overlay UI, question detection, answer streaming
-  Settings.tsx   keys, devices, model, mode, resume, instructions, documents
-  components/    setup wizard, mock interview, call history, key field, audio meter
-  lib/llm.ts     AI SDK providers and prompts
-  lib/net.ts     fetch over net.rs, with multi-key failover
-  lib/sessions.ts  saved calls
-  lib/documents.ts PDF / DOCX / text extraction
-  lib/speech.ts  text-to-speech for the mock interviewer
-```
+**Sotto is open to contributions, and suggestions are just as welcome as code.**
 
-API keys are stored in the OS credential store (macOS Keychain, Windows Credential
-Manager), never in a file, and are sent only to the providers you configure. Keys saved by
-older versions in `settings.json` are moved to the keychain on first launch. Other
-settings live in the app data folder (`settings.json`).
+- 💡 **Have an idea?** [Suggest a feature](https://github.com/taarruunnnn/sotto/issues/new?template=feature_request.md)
+- 🐞 **Found a bug?** [Report it](https://github.com/taarruunnnn/sotto/issues/new?template=bug_report.md)
+- 🛠️ **Want to code?** Read [CONTRIBUTING.md](CONTRIBUTING.md), then pick something below.
+- ⭐ **Like it?** Star the repo and share it. It really helps other people find Sotto.
+
+Good places to start:
+
+- **Linux support** (audio loopback with PipeWire/PulseAudio)
+- **Local, offline transcription** with Whisper or NVIDIA Parakeet, so no Deepgram key is needed
+- **More practice modes:** case interviews, sales role-play, presentations, language practice
+- **Higher-quality voices** for the mock interviewer
+- **Signed and notarized builds**, and automatic updates
+- **Translations** of the interface
+- **Tests** for question detection, prompts and audio handling
 
 ## Roadmap
 
-- Local transcription (NVIDIA Parakeet / Whisper) for offline use
+- [x] Live two-sided transcription, auto answers, notes, call history
+- [x] Mock interview with spoken questions and feedback
+- [x] OS keychain storage, OpenRouter and key auto-detection
+- [ ] Local transcription (Whisper / NVIDIA Parakeet) for offline use
+- [ ] Linux support
+- [ ] Signed builds and auto-update
+- [ ] More practice scenarios
+
+## FAQ
+
+**Is Sotto free?**
+Yes. The app is free and open source under the MIT license. You pay Deepgram and your AI
+provider directly for what you use.
+
+**Does it work with Zoom, Google Meet, Microsoft Teams and Slack?**
+Yes. Sotto listens to your computer's audio, so it works with any call app, in the browser
+or as a desktop app.
+
+**Where does my data go?**
+Audio goes to Deepgram for transcription, and text goes to the AI provider you chose.
+Transcripts, notes and settings are stored only on your computer, and API keys are in your
+OS keychain. There's no Sotto server.
+
+**Can I use it offline?**
+Not yet. Local transcription is on the [roadmap](#roadmap).
+
+**Is Sotto a cheating tool?**
+No. It's built for practice, meetings, accessibility and note-taking. See
+[Responsible use](#responsible-use).
+
+**Is Sotto an alternative to Parakeet AI?**
+Yes. Sotto is a free, open-source alternative to Parakeet AI, Cluely, Final Round AI,
+LockedIn AI and similar tools.
+
+**How is it different from Parakeet AI, Cluely or Final Round AI?**
+Sotto is open source, free, runs with your own keys and model, keeps your data on your
+machine, and focuses on practice and productivity. See [Why Sotto?](#why-sotto)
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). Sotto isn't affiliated with or endorsed by any of the companies or
+products mentioned in this README. All trademarks belong to their owners.

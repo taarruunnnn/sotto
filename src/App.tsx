@@ -272,6 +272,14 @@ export default function App() {
           // than waiting for the end-of-turn pause. If they keep talking, it restarts.
           speculatedRef.current = cur.committed;
           trigger = true;
+        } else if (auto && !e.isFinal) {
+          // Faster still: interim text that already ends in a question mark. Deepgram
+          // usually finalises the same words, which then don't trigger a second answer.
+          const said = `${cur.committed} ${cur.interim}`.trim();
+          if (said.endsWith("?") && said !== speculatedRef.current && looksLikeQuestion(said)) {
+            speculatedRef.current = said;
+            trigger = true;
+          }
         }
 
         // Update live text before answering, so the prompt has it exactly once.
