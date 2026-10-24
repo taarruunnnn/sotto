@@ -33,8 +33,9 @@ AI model.
 
 ## See it in action
 
-<!-- TRAILER -->
-**[▶ Watch the 75-second trailer](docs/media/trailer.mp4)**
+https://github.com/user-attachments/assets/59752938-bdb2-4ed7-b082-ac9c57081c27
+
+<sub>No sound. Can't see the player? [Download the trailer](docs/media/trailer.mp4).</sub>
 
 <table>
   <tr>
